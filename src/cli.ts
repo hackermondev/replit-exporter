@@ -37,6 +37,16 @@ program
 
 program.parse(process.argv);
 
+process.on('unhandledRejection', (error) => {
+    console.error(error);
+    console.warn('Unknown error occured, simply restart the CLI to resume download');
+});
+
+process.on('uncaughtException', (error) => {
+    console.error(error);
+    console.warn('Unknown error occured, simply restart the CLI to resume download');
+});
+
 async function run(
     output: string,
     concurrent: number,
@@ -77,9 +87,9 @@ async function run(
         }
 
         const repls = await exporter.getNextRepls(concurrent);
-        count += repls.length;
 
-        console.log(`Downloading ${repls.length} repls.`);
+        console.log(`Downloading ${repls.length} repls (${count} finished).`);
+        count += repls.length;
         if (repls.length < 1) break;
 
         const zips = repls.map((r) => new ReplZip(r, output, filteredFiles));
