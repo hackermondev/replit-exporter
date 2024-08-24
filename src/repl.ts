@@ -56,8 +56,8 @@ export class ReplZip {
     async unzip() {
         await extract(this.paths.zip, {
             dir: this.paths.folder,
-            defaultDirMode: 9999,
-            defaultFileMode: 9999,
+            defaultDirMode: 0o755,
+            defaultFileMode: 0o755,
         });
 
         await unlink(this.paths.zip);
@@ -65,13 +65,13 @@ export class ReplZip {
         const filters = this.filter.map((f) => join(this.paths.folder, f));
         const filtered = new Glob(filters, { absolute: true });
         const iterator = filtered.iterate();
-        
+
         while (true) {
             const { done, value } = await iterator.next();
             if (done) break;
 
             if (!value) continue;
-            
+
             const file = value;
             await rm(file, { force: true, recursive: true });
         }

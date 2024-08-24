@@ -1,6 +1,6 @@
 {
 	"name": "replit-export",
-	"version": "1.0.5",
+	"version": "1.0.6",
 	"main": "dist/index.js",
 	"repository": "https://github.com/hackermondev/replit-exporter",
 	"author": "Hackermon <therealhackermon@gmail.com>",
