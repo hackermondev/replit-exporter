@@ -1,4 +1,5 @@
 import axios, { AxiosInstance, AxiosResponse, CreateAxiosDefaults } from 'axios';
+import { useMiddleware } from '../axios/ratelimit';
 
 const defaultConfig: CreateAxiosDefaults<any> = {
     baseURL: 'https://replit.com',
@@ -21,7 +22,9 @@ export class ReplitClient {
         } as any;
 
         config.headers['cookie'] = `connect.sid=${authorizationCookie}`;
+
         this.rest = axios.create(config);
+        useMiddleware(this.rest);
     }
 
     public async graphql<T>(operationName: string, variables: { [key: string]: any }, query: string): Promise<AxiosResponse<GraphqlResponse<T>>> {

@@ -1,4 +1,5 @@
 import { WriteStream } from 'fs';
+import { trace } from '../logger';
 import { ReplitClient } from './replit';
 
 export interface ExporterState {
@@ -40,6 +41,11 @@ export class Exporter {
             throw error;
         }
 
+        if (!response.data?.currentUser) {
+            throw new Error('Invalid authorization cookie');
+        }
+
+        trace('getNextRepls response', JSON.stringify(response.data));
         const data = response.data?.currentUser.exportRepls;
         const pageInfo = data?.pageInfo;
         const repls = data?.items;
@@ -59,11 +65,25 @@ export class Exporter {
         // Find repl slug url
         const response = await this.client.rest.get(`/replid/${repl.id}`, { maxRedirects: 0, validateStatus: status => status >= 300 && status <= 399 });
         const slugUrl = response.headers['location'];
+        trace('repl slug url', repl.id, slugUrl);
 
         // Download
         const zipUrl = `${slugUrl}.zip`;
         const download = await this.client.rest.get(zipUrl, { responseType: 'stream' });
+        const contentType = download.headers['content-type'];
+        if (contentType != 'application/zip') {
+            throw new Error(`Invalid content type, should be application/zip, got ${contentType}`);
+        } 
+
         download.data.pipe(stream);
+        
+        await new Promise((resolve, reject) => {
+            stream.once('finish', resolve);
+            stream.once('error', reject);
+
+            if (stream.errored) reject(new Error('Stream errored'))
+            else if (stream.closed) resolve(1);
+        });
     }
 }
 
