@@ -4,6 +4,7 @@ import { ReplitClient } from './replit';
 
 export interface ExporterState {
     pageInfo?: PageInfo;
+    user?: number;
 }
 
 export interface ExporterConfig {
@@ -69,6 +70,26 @@ export class Exporter {
         );
     }
 
+    public async getUser(): Promise<number> {
+        const { data: response } = await this.client.graphql<CurrentUserResult>(
+            'CurrentUser',
+            {},
+            queryCurrentUser,
+        );
+        const errors = response.errors;
+        if (errors && errors.length > 0) {
+            const error = new Error('Cannot fetch current user');
+            error.response = errors;
+            throw error;
+        }
+
+        if (!response.data?.currentUser) {
+            throw new Error('Invalid authorization cookie');
+        }
+
+        return response.data.currentUser.id;
+    }
+
     public async downloadRepl(repl: Repl, stream: WriteStream) {
         // Find repl slug url
         const response = await this.client.rest.get(`/replid/${repl.id}`, {
@@ -131,7 +152,13 @@ export interface Repl {
     isBoosted: boolean;
 }
 
-export interface SearchReplResult {
+interface CurrentUserResult {
+    currentUser: {
+        id: number;
+    };
+}
+
+interface SearchReplResult {
     currentUser: {
         exportRepls: {
             items: Array<Repl>;
@@ -139,6 +166,13 @@ export interface SearchReplResult {
         };
     };
 }
+
+const queryCurrentUser = `query CurrentUser {
+    currentUser {
+        id
+    }
+}
+`;
 
 const query = `query ExportRepls($search: String!, $after: String, $count: Int) {
     currentUser {
@@ -151,6 +185,10 @@ const query = `query ExportRepls($search: String!, $after: String, $count: Int) 
           wasPublished
           timeCreated
           timeUpdated
+          user {
+            id
+            username
+          }
           config {
             isServer
             isExtension

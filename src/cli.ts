@@ -58,6 +58,16 @@ async function run(
     const exporter = new Exporter({ rest: { authorization: auth }, state: state });
     let count = 0;
 
+    if (state) {
+        const userId = await exporter.getUser();
+        if (userId != state.user) {
+            console.warn(`Ignoring savefile, user mismatch (${state.user} != ${userId})`);
+            exporter.state = { user: userId };
+        } else {
+            exporter.state.user = userId;
+        }
+    }
+
     while (true) {
         if (maxRepls && concurrent + count > maxRepls) {
             concurrent = maxRepls - count;
