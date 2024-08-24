@@ -1,0 +1,19 @@
+{
+  "name": "replit-exporter",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "repository": "https://github.com/hackermondev/replit-exporter",
+  "author": "Hackermon <therealhackermon@gmail.com>",
+  "license": "MIT",
+  "bin": "dist/cli.js",
+  "scripts": {
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "@types/node": "^22.5.0",
+    "typescript": "^5.5.4"
+  },
+  "dependencies": {
+    "axios": "^1.7.5"
+  }
+}
