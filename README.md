@@ -1,6 +1,6 @@
 # Replit Starter Plan Changes
 
-Replit has recently updated its Starter Plan (the core free plan) to limit users to 3 Repls. Accounts exceeding this limit may face restrictions in the future. To help you transition smoothly, this CLI script downloads all Repls from your account, including environment variables and configuration data, allowing you to securely move your projects off Replit.
+Replit has recently updated its Starter Plan (the core free plan) to limit users to 3 Repls. Accounts exceeding this limit may face restrictions in the future. To help transition smoothly, this CLI script downloads all Repls from your account, including environment variables and configuration data, allowing you to securely move your projects off Replit.
 
 ## Installation
 

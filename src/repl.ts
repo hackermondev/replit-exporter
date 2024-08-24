@@ -3,7 +3,8 @@ import extract from 'extract-zip';
 
 import { join } from 'node:path';
 import { createWriteStream, existsSync, WriteStream } from 'node:fs';
-import { readFile, unlink, writeFile, glob, rm } from 'node:fs/promises';
+import { readFile, unlink, writeFile, rm } from 'node:fs/promises';
+import glob, { Glob } from 'glob';
 
 // Post processing for extracting zip files from repls
 export class ReplZip {
@@ -62,11 +63,15 @@ export class ReplZip {
         await unlink(this.paths.zip);
 
         const filters = this.filter.map((f) => join(this.paths.folder, f));
-        const filtered = glob(filters);
+        const filtered = new Glob(filters, { absolute: true });
+        const iterator = filtered.iterate();
+        
         while (true) {
-            const { done, value } = await filtered.next();
+            const { done, value } = await iterator.next();
             if (done) break;
 
+            if (!value) continue;
+            
             const file = value;
             await rm(file, { force: true, recursive: true });
         }
