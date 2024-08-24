@@ -1,12 +1,11 @@
 // Axios middleware to automatically retry 429 requests
 import { AxiosInstance } from 'axios';
-import { trace } from '../logger';
 
 // Maximum retry-after duration in seconds (to avoid long delays)
 const MAX_RETRY_AFTER = 60;
 
 // Retry delay in seconds if 'retry-after' header is not present or exceeds MAX_RETRY_AFTER
-const DEFAULT_RETRY_DELAY = 3;
+const DEFAULT_RETRY_DELAY = 15;
 
 export const useRatelimitMiddleware = (axios: AxiosInstance) => {
     axios.interceptors.response.use(
@@ -26,7 +25,9 @@ export const useRatelimitMiddleware = (axios: AxiosInstance) => {
                     retryAfter = DEFAULT_RETRY_DELAY;
                 }
 
-                trace(`${config.url} ratelimited, automatically retrying in ${retryAfter} seconds`);
+                console.warn(
+                    `${config.url} ratelimited, automatically retrying in ${retryAfter} seconds`,
+                );
 
                 // Wait for the specified retry delay
                 await new Promise((resolve) => setTimeout(resolve, retryAfter * 1000));

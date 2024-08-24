@@ -91,15 +91,8 @@ export class Exporter {
     }
 
     public async downloadRepl(repl: Repl, stream: WriteStream) {
-        // Find repl slug url
-        const response = await this.client.rest.get(`/replid/${repl.id}`, {
-            maxRedirects: 0,
-            validateStatus: (status) => status >= 300 && status <= 399,
-        });
-        const slugUrl = response.headers['location'];
-        trace('repl slug url', repl.id, slugUrl);
-
         // Download
+        const slugUrl = `https://replit.com/@${repl.user.username}/${repl.slug}`;
         const zipUrl = `${slugUrl}.zip`;
         const download = await this.client.rest.get(zipUrl, { responseType: 'stream' });
         const contentType = download.headers['content-type'];
@@ -132,6 +125,10 @@ export interface Repl {
     wasPublished: boolean;
     timeCreated: string;
     timeUpdated: string;
+    user: {
+        id: number;
+        username: string;
+    };
     config: {
         isServer: boolean;
         isExtension: boolean;
@@ -189,6 +186,7 @@ const query = `query ExportRepls($search: String!, $after: String, $count: Int) 
             id
             username
           }
+          language
           config {
             isServer
             isExtension

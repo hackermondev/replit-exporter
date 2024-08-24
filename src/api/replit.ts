@@ -1,8 +1,11 @@
 import axios, { AxiosInstance, AxiosResponse, CreateAxiosDefaults } from 'axios';
 import { useRatelimitMiddleware } from '../axios/ratelimit';
 
+import https from 'https';
+
 const defaultConfig: CreateAxiosDefaults<any> = {
     baseURL: 'https://replit.com',
+    httpsAgent: new https.Agent({ keepAlive: true }),
     headers: {
         'user-agent': 'Replit-Exporter (+https://github.com/hackermondev/replit-exporter)',
 

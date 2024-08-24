@@ -18,6 +18,7 @@ program
     .option('-f, --filter <...files>', 'Filter files that match the expressions', [
         'node_modules/',
         '.cargo/',
+        '.cache/typescript/',
     ])
     .action(async (args) => {
         const output = resolve(args.output);
