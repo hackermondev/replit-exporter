@@ -27,4 +27,4 @@ export const trace = (...data: any[]) => {
     const timestamp = new Date().toISOString();
     const c = chalk.bgCyanBright(timestamp, ...data);
     return console.log(c);
-}
+};

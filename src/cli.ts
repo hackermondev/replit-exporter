@@ -15,7 +15,10 @@ program
     .option('-l, --load <file>', 'Exporter savefile to continue from', '.replit-export.save')
     .option('-c, --concurrent <number>', 'Maximum concurrent download', '15')
     .option('-m, --max', 'Maximum amount of Repls to download')
-    .option('-f, --filter <...files>', 'Filter files that match the expressions', ['node_modules/', '.cargo/'])
+    .option('-f, --filter <...files>', 'Filter files that match the expressions', [
+        'node_modules/',
+        '.cargo/',
+    ])
     .action(async (args) => {
         const output = resolve(args.output);
         const concurrent = parseInt(args.concurrent);
@@ -33,14 +36,21 @@ program
 
 program.parse(process.argv);
 
-async function run(output: string, concurrent: number, saveFile: string, auth: string, filteredFiles: Array<string>, maxRepls?: number, ) {
+async function run(
+    output: string,
+    concurrent: number,
+    saveFile: string,
+    auth: string,
+    filteredFiles: Array<string>,
+    maxRepls?: number,
+) {
     let state = null;
     if (existsSync(saveFile)) {
         const save = (await readFile(saveFile)).toString();
-        try { 
+        try {
             state = JSON.parse(save);
             console.log('Resuming state', state);
-        } catch {};
+        } catch {}
     }
 
     if (!existsSync(output)) mkdirSync(output);
@@ -49,7 +59,7 @@ async function run(output: string, concurrent: number, saveFile: string, auth: s
     let count = 0;
 
     while (true) {
-        if (maxRepls && (concurrent + count) > maxRepls) {
+        if (maxRepls && concurrent + count > maxRepls) {
             concurrent = maxRepls - count;
         } else if (maxRepls && count >= maxRepls) {
             break;
@@ -61,9 +71,12 @@ async function run(output: string, concurrent: number, saveFile: string, auth: s
         console.log(`Downloading ${repls.length} repls.`);
         if (repls.length < 1) break;
 
-        const zips = repls.map(r => new ReplZip(r, output, filteredFiles));
-        await exporter.bulkDownloadRepls(repls, zips.map(z => z.getZipWriteStream()));
-        await Promise.all(zips.map(z => z.process()));
+        const zips = repls.map((r) => new ReplZip(r, output, filteredFiles));
+        await exporter.bulkDownloadRepls(
+            repls,
+            zips.map((z) => z.getZipWriteStream()),
+        );
+        await Promise.all(zips.map((z) => z.process()));
         await save(exporter, saveFile);
     }
 

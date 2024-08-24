@@ -41,7 +41,10 @@ export class ReplZip {
             const data = (await readFile(replitEnvPath)).toString();
             const envData = JSON.parse(data).environment;
 
-            const env = Object.keys(envData).filter(e => !REPLIT_SYSTEM_ENV.includes(e)).map(n => `${n}=${envData[n]}`).join('\r\n');
+            const env = Object.keys(envData)
+                .filter((e) => !REPLIT_SYSTEM_ENV.includes(e))
+                .map((n) => `${n}=${envData[n]}`)
+                .join('\r\n');
             const envPath = join(this.paths.folder, '.env');
             if (!existsSync(envPath)) {
                 await writeFile(envPath, env);
@@ -58,14 +61,14 @@ export class ReplZip {
 
         await unlink(this.paths.zip);
 
-        const filters = this.filter.map(f => join(this.paths.folder, f));
+        const filters = this.filter.map((f) => join(this.paths.folder, f));
         const filtered = glob(filters);
         while (true) {
             const { done, value } = await filtered.next();
             if (done) break;
 
             const file = value;
-            await rm(file, { force: true, recursive: true })
+            await rm(file, { force: true, recursive: true });
         }
     }
 }

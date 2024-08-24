@@ -15,7 +15,9 @@ export interface ExporterConfig {
 }
 
 declare global {
-    interface Error { response?: Array<{ [key: string]: string }>; }
+    interface Error {
+        response?: Array<{ [key: string]: string }>;
+    }
 }
 
 export class Exporter {
@@ -28,11 +30,15 @@ export class Exporter {
     }
 
     public async getNextRepls(count: number = 15): Promise<Array<Repl>> {
-        const { data: response } = await this.client.graphql<SearchReplResult>('ExportRepls', {
-            search: '',
-            after: this.state.pageInfo?.nextCursor,
-            count,
-        }, query);
+        const { data: response } = await this.client.graphql<SearchReplResult>(
+            'ExportRepls',
+            {
+                search: '',
+                after: this.state.pageInfo?.nextCursor,
+                count,
+            },
+            query,
+        );
 
         const errors = response.errors;
         if (errors && errors.length > 0) {
@@ -55,15 +61,20 @@ export class Exporter {
     }
 
     public async bulkDownloadRepls(repls: Array<Repl>, streams: Array<WriteStream>) {
-        await Promise.all(repls.map(async (repl, index) => {
-            const stream = streams[index];
-            await this.downloadRepl(repl, stream);
-        }));
+        await Promise.all(
+            repls.map(async (repl, index) => {
+                const stream = streams[index];
+                await this.downloadRepl(repl, stream);
+            }),
+        );
     }
 
     public async downloadRepl(repl: Repl, stream: WriteStream) {
         // Find repl slug url
-        const response = await this.client.rest.get(`/replid/${repl.id}`, { maxRedirects: 0, validateStatus: status => status >= 300 && status <= 399 });
+        const response = await this.client.rest.get(`/replid/${repl.id}`, {
+            maxRedirects: 0,
+            validateStatus: (status) => status >= 300 && status <= 399,
+        });
         const slugUrl = response.headers['location'];
         trace('repl slug url', repl.id, slugUrl);
 
@@ -73,15 +84,15 @@ export class Exporter {
         const contentType = download.headers['content-type'];
         if (contentType != 'application/zip') {
             throw new Error(`Invalid content type, should be application/zip, got ${contentType}`);
-        } 
+        }
 
         download.data.pipe(stream);
-        
+
         await new Promise((resolve, reject) => {
             stream.once('finish', resolve);
             stream.once('error', reject);
 
-            if (stream.errored) reject(new Error('Stream errored'))
+            if (stream.errored) reject(new Error('Stream errored'));
             else if (stream.closed) resolve(1);
         });
     }
@@ -125,8 +136,8 @@ export interface SearchReplResult {
         exportRepls: {
             items: Array<Repl>;
             pageInfo: PageInfo;
-        }
-    }
+        };
+    };
 }
 
 const query = `query ExportRepls($search: String!, $after: String, $count: Int) {

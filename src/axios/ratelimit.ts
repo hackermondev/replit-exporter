@@ -2,14 +2,13 @@
 import { AxiosInstance } from 'axios';
 import { trace } from '../logger';
 
-
 // Maximum retry-after duration in seconds (to avoid long delays)
-const MAX_RETRY_AFTER = 60; 
+const MAX_RETRY_AFTER = 60;
 
 // Retry delay in seconds if 'retry-after' header is not present or exceeds MAX_RETRY_AFTER
 const DEFAULT_RETRY_DELAY = 3;
 
-export const useMiddleware = (axios: AxiosInstance) => {
+export const useRatelimitMiddleware = (axios: AxiosInstance) => {
     axios.interceptors.response.use(
         (response) => {
             // If the response is successful, return it
@@ -38,6 +37,6 @@ export const useMiddleware = (axios: AxiosInstance) => {
 
             // If the error is not a 429, reject it
             return Promise.reject(error);
-        }
+        },
     );
-}
+};
