@@ -2,6 +2,7 @@ import axios, { AxiosInstance, AxiosResponse, CreateAxiosDefaults } from 'axios'
 import { useRatelimitMiddleware } from '../axios/ratelimit';
 
 import https from 'https';
+import { useRetryMiddleware } from '../axios/retry';
 
 const defaultConfig: CreateAxiosDefaults<any> = {
     baseURL: 'https://replit.com',
@@ -28,6 +29,7 @@ export class ReplitClient {
 
         this.rest = axios.create(config);
         useRatelimitMiddleware(this.rest);
+        useRetryMiddleware(this.rest);
     }
 
     public async graphql<T>(

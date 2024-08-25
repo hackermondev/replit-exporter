@@ -61,13 +61,22 @@ export class Exporter {
         return repls || [];
     }
 
-    public async bulkDownloadRepls(repls: Array<Repl>, streams: Array<WriteStream>) {
+    public async bulkDownloadRepls(
+        repls: Array<Repl>,
+        streams: Array<WriteStream>,
+    ): Promise<{ failed: Array<string> }> {
+        const failed: Array<string> = [];
         await Promise.all(
             repls.map(async (repl, index) => {
                 const stream = streams[index];
-                await this.downloadRepl(repl, stream);
+                await this.downloadRepl(repl, stream).catch((error) => {
+                    console.warn(`${repl.slug} (${repl.id}) failed`, error);
+                    failed.push(repl.id);
+                });
             }),
         );
+
+        return { failed };
     }
 
     public async getUser(): Promise<number> {

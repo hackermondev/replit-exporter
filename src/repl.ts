@@ -8,7 +8,7 @@ import glob, { Glob } from 'glob';
 
 // Post processing for extracting zip files from repls
 export class ReplZip {
-    private repl: Repl;
+    public repl: Repl;
     private paths: { zip: string; folder: string };
     private filter: Array<string>;
 

@@ -3,8 +3,8 @@ process.env['NODE_NO_WARNINGS'] = '1';
 import chalk from 'chalk';
 import { program } from 'commander';
 import { existsSync, mkdirSync } from 'fs';
-import { readFile, writeFile } from 'fs/promises';
-import { resolve } from 'path';
+import { appendFile, readFile, writeFile } from 'fs/promises';
+import { join, resolve } from 'path';
 import { Exporter } from './api/exporter';
 import { ReplZip } from './repl';
 
@@ -40,11 +40,13 @@ program.parse(process.argv);
 process.on('unhandledRejection', (error) => {
     console.error(error);
     console.warn('Unknown error occured, simply restart the CLI to resume download');
+    process.exit(1);
 });
 
 process.on('uncaughtException', (error) => {
     console.error(error);
     console.warn('Unknown error occured, simply restart the CLI to resume download');
+    process.exit(1);
 });
 
 async function run(
@@ -66,19 +68,19 @@ async function run(
 
     if (!existsSync(output)) mkdirSync(output);
 
+    const failedReplsPath = join(output, 'failed-repls.txt');
     const exporter = new Exporter({ rest: { authorization: auth }, state: state });
     let count = 0;
 
+    const userId = await exporter.getUser();
     if (state) {
-        const userId = await exporter.getUser();
         if (userId != state.user) {
             console.warn(`Ignoring savefile, user mismatch (${state.user} != ${userId})`);
-            exporter.state = { user: userId };
-        } else {
-            exporter.state.user = userId;
+            exporter.state = {};
         }
     }
 
+    exporter.state.user = userId;
     while (true) {
         if (maxRepls && concurrent + count > maxRepls) {
             concurrent = maxRepls - count;
@@ -92,13 +94,19 @@ async function run(
         count += repls.length;
         if (repls.length < 1) break;
 
-        const zips = repls.map((r) => new ReplZip(r, output, filteredFiles));
-        await exporter.bulkDownloadRepls(
+        let zips = repls.map((r) => new ReplZip(r, output, filteredFiles));
+        const { failed } = await exporter.bulkDownloadRepls(
             repls,
             zips.map((z) => z.getZipWriteStream()),
         );
+
+        zips = zips.filter((z) => !failed.includes(z.repl.id));
         await Promise.all(zips.map((z) => z.process()));
         await save(exporter, saveFile);
+
+        if (failed.length > 0) {
+            await appendFile(failedReplsPath, failed.join('\r\n'));
+        }
     }
 
     console.log(chalk.green(`Downloaded ${count} repls`));
