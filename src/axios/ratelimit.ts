@@ -2,10 +2,10 @@
 import { AxiosInstance } from 'axios';
 
 // Maximum retry-after duration in seconds (to avoid long delays)
-const MAX_RETRY_AFTER = 60;
+const MAX_RETRY_AFTER = 500;
 
 // Retry delay in seconds if 'retry-after' header is not present or exceeds MAX_RETRY_AFTER
-const DEFAULT_RETRY_DELAY = 15;
+const DEFAULT_RETRY_DELAY = 100;
 
 export const useRatelimitMiddleware = (axios: AxiosInstance) => {
     axios.interceptors.response.use(
