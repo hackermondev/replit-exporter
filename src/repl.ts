@@ -4,7 +4,7 @@ import extract from 'extract-zip';
 import { join } from 'node:path';
 import { createWriteStream, existsSync, WriteStream } from 'node:fs';
 import { readFile, unlink, writeFile, rm } from 'node:fs/promises';
-import glob, { Glob } from 'glob';
+import { Glob } from 'glob';
 
 // Post processing for extracting zip files from repls
 export class ReplZip {
@@ -51,6 +51,8 @@ export class ReplZip {
                 await writeFile(envPath, env);
             }
         }
+
+        console.log(`Extracted @${this.repl.user.username}/${this.repl.slug}`);
     }
 
     async unzip() {

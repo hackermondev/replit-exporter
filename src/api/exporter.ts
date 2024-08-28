@@ -73,6 +73,8 @@ export class Exporter {
                     console.warn(`${repl.slug} (${repl.id}) failed`, error);
                     failed.push(repl.id);
                 });
+
+                console.log(`Downloaded @${repl.user.username}/${repl.slug} (${repl.id})`);
             }),
         );
 
