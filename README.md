@@ -1,3 +1,10 @@
+## Official Replit Exporter
+Replit has introduced an official way to bulk export repls. From your account settings, click "Start Export":
+
+<img width="516" alt="image" src="https://github.com/user-attachments/assets/3c9f14e1-a531-4dfe-beb3-34098ff0c6ca" />
+
+Although you can still use this CLI, no support will be provided and things are more likely to break.
+
 # Replit Starter Plan Changes
 
 Replit has recently updated its Starter Plan (the core free plan) to limit users to 3 Repls. Accounts exceeding this limit will face restrictions in the future (all repls will be automatically deleted in a year) unless they subscribe to a $25/month plan. 
